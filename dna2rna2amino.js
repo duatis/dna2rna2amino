@@ -84,6 +84,22 @@ module.exports = function(_DNA) {
 		console.log(result)
 	}
 
+	orf = function(string)
+	{
+		console.log( getOrf(this[string]) )		
+	}
+
+	translate2amino = function(string)
+	{
+		var orfs = getOrf(this[string]), cut 
+		for( var i in orfs )
+		{
+			console.log('Start: ' + orfs[i].start + ', Stop: ' + orfs[i].stop)
+			console.log('ORF: ' + orfs[i].orf )
+			this.amino( codons(orfs[i].orf) )
+		}
+	}
+
 	return this;
 }
 
@@ -98,6 +114,36 @@ function codons(RNA)
 		_RNA += RNA[i]
 	}
 	return _RNA
+}
+
+function getOrf( dna )
+{
+	var rna = translate(dna),
+	starts = findStarts(rna),
+	stops  = findStops(rna),
+	orf = []
+
+	for( var start in starts )
+	{
+		for( var stop in stops ){
+			if( (stops[stop]-starts[start])%3 == 0 &&  (stops[stop]-starts[start] > 3) && starts[start] < stops[stop]){
+				cut = rna.split('').splice(starts[start], (stops[stop]+3)-starts[start]).join('')
+				orf.push({start: starts[start],stop:stops[stop], orf: cut})
+			}
+		}
+	}
+
+	if(orf.length<2) return orf;	
+
+	for( var i = 0; i < orf.length; i++ )
+	{
+		for( var j = 0; j < orf.length; j++ )
+		{
+			if( j == i ||  !( orf[i].start && orf[j].start ) ) continue;
+			if( orf[i].start >= orf[j].start &&  orf[i].stop <= orf[j].stop )orf[i].start = false;
+		}
+	}
+	return orf.filter(function(item){ return item.start })
 }
 
 function translate( _DNA )
@@ -153,27 +199,32 @@ function inverse( _DNA )
 
 function findStarts( RNA )
 {
+	var _starts = []
 	starts.forEach( function(codon){
 		index = RNA.indexOf(codon)
 		while( index >= 0 )
 		{
-			console.log( codon + ': ' + index)
+			_starts.push(index)
 			index = RNA.indexOf(codon, index+3)
 		}
 	} )
+	return _starts
 }
 
 
 function findStops( RNA )
 {
+	var _stops = []
 	stops.forEach( function(codon){
 		index = RNA.indexOf(codon)
 		while( index >= 0 )
 		{
-			console.log( codon + ': ' + index)
+			_stops.push(index)
 			index = RNA.indexOf(codon, index+3)
 		}
 	} )
+
+	return _stops
 }
 
 // RNA = translate(DNA)

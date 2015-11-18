@@ -59,6 +59,17 @@ var fs  = require('fs')
      });
 
       program
+       .command('orf')
+       .option('-i, --inverse', 'Use inverse DNA string.' )
+       .description('Find orf and translate to amino')
+       .action(function() {
+        if(this.inverse)
+          dna2rna2amino.orf('DNAI')
+        else
+          dna2rna2amino.orf('DNA')
+     });
+
+      program
        .command('codons <start> <end>')
        .option('-i, --inverse', 'Use inverse RNA string.' )
        .option('-s, --save <file>', 'Save Result to file')
@@ -97,6 +108,17 @@ var fs  = require('fs')
           dna2rna2amino.amino(data)
         });
      });
+
+  program
+     .command('translate')
+     .option('-i, --inverse', 'Use inverse RNA string.' )
+     .description('Translate dna into amino')
+     .action(function() {
+      if(this.inverse)
+        dna2rna2amino.translate2amino('DNAI')
+      else
+        dna2rna2amino.translate2amino('DNA')
+   });
 
     
     program.parse(process.argv);
